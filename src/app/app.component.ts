@@ -13,7 +13,6 @@ import {MenuService} from './services/menu.service';
 import {TimerService} from './services/timer-service';
 import {AccountType} from './models/AccountType';
 import * as uuid from 'uuid';
-import {constants} from './core/enums/constants';
 
 @Component({
   selector: 'app-root',
@@ -145,13 +144,12 @@ export class AppComponent implements OnInit {
   }
 
   private manageAutoUpdate(): void {
-    this.app.createVersionJson();
+    this.app.checkVersionJson();
 
     const ipc = this.app.getIpcRenderer();
     ipc.on('UPDATE_AVAILABLE', (_, info) => {
-      console.log(info);
+      this.app.setUpdateInfo(info.version, info.releaseName, info.releaseDate, info.releaseNotes);
       if (this.app.compareLeappVersionsAndReturnIfUpdateNeeded()) {
-        this.app.setUpdateInfo(info.version, info.releaseName, info.releaseDate, info.releaseNotes);
         this.app.updateDialog();
       }
     });

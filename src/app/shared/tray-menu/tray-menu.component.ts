@@ -31,7 +31,7 @@ export class TrayMenuComponent extends AntiMemLeak implements OnInit {
   }
 
   ngOnInit() {
-    this.subs.add(this.appService.redrawList.subscribe(res => {
+    this.subs.add(this.appService.redrawList.subscribe(_ => {
       this.generateMenu();
     }));
     this.generateMenu();
@@ -68,7 +68,7 @@ export class TrayMenuComponent extends AntiMemLeak implements OnInit {
         { label,
           type: 'normal',
           icon,
-          click: (menuItem, browserWindow, event) => {
+          click: () => {
             if (!session.active) {
               this.sessionService.startSession(session);
               this.credentialService.refreshCredentials(session.account.type);
@@ -93,16 +93,15 @@ export class TrayMenuComponent extends AntiMemLeak implements OnInit {
 
     if (!this.currentTray) {
       this.currentTray = new (this.appService.getTray())(__dirname + `/assets/images/LeappMini.png`);
-    } else {
-      if (this.appService.compareLeappVersionsAndReturnIfUpdateNeeded()) {
-        voices.push({ type: 'separator' });
-        voices.push({ label: 'check for updates...', type: 'normal', click: () => { this.appService.updateDialog(); } });
-
-        this.currentTray.setImage(__dirname + `/assets/images/LeappMini2.png`);
-      } else {
-        this.currentTray.setImage(__dirname + `/assets/images/LeappMini.png`);
-      }
     }
+
+    if (this.appService.getSavedVersionComparison()) {
+      voices.push({ type: 'separator' });
+      voices.push({ label: 'check for updates...', type: 'normal', click: () => { this.appService.updateDialog(); } });
+
+      this.currentTray.setImage(__dirname + `/assets/images/LeappMini2.png`);
+    }
+
 
     voices = voices.concat(extraInfo);
     const contextMenu = this.appService.getMenu().buildFromTemplate(voices);

@@ -38,7 +38,8 @@ button.disabled {
 .button-equalizer button:first-child { float: left; }
 .button-equalizer button:last-child { float: right; }
 
-p { color: $text-color; overflow: auto; }
+p { color: $text-color; overflow-y: scroll; height: 264px; text-align: left; }
+h3 { text-align: left; }
 
 .modal-header {
   color: $text-color!important;

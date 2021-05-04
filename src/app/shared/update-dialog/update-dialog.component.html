@@ -7,9 +7,8 @@
 
 <div class="modal-body text-center">
 
-  <h2>A new version is available</h2>
   <h3>Version: {{version}}</h3>
-  <h3>Release Date: {{releaseDate}}</h3>
+  <h3>Release Date: {{releaseDate | date }}</h3>
   <br>
   <p [innerHTML]="releaseNotes"></p>
   <br>
