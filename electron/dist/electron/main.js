@@ -16,12 +16,12 @@ var environment_1 = require("../src/environments/environment");
 var CryptoJS = require("crypto-js");
 var initial_configuration_1 = require("../src/app/core/initial-configuration");
 var node_machine_id_1 = require("node-machine-id");
-var app_updater_1 = require("../src/app/core/app-updater");
 var _a = require('electron'), app = _a.app, BrowserWindow = _a.BrowserWindow, globalShortcut = _a.globalShortcut, Menu = _a.Menu, ipcMain = _a.ipcMain;
 var url = require('url');
 var fs = require('fs');
 var os = require('os');
 var log = require('electron-log');
+var autoUpdater = require('electron-updater').autoUpdater;
 var ipc = ipcMain;
 // Fix for warning at startup
 app.allowRendererProcessReuse = true;
@@ -51,6 +51,15 @@ var windowDefaultConfig = {
 // Define the aws credentials path from config file in *src/environments*
 var workspacePath = os.homedir() + '/' + environment_1.environment.lockFileDestination;
 var awsCredentialsPath = os.homedir() + '/' + environment_1.environment.credentialsDestination;
+var buildAutoUpdater = function (win) {
+    autoUpdater.allowDowngrade = false;
+    autoUpdater.allowPrerelease = false;
+    autoUpdater.autoDownload = false;
+    autoUpdater.checkForUpdates();
+    autoUpdater.on('update-available', function (info) {
+        win.webContents.send('UPDATE_AVAILABLE', info);
+    });
+};
 // Setup the first workspace in order to define the .Leapp directory and the .aws one
 var setupWorkspace = function () {
     try {
@@ -136,8 +145,7 @@ var generateMainWindow = function () {
     });
     app.on('ready', function () {
         createWindow();
-        app_updater_1.AppUpdater.getInstance().initUpdater({});
-        app_updater_1.AppUpdater.getInstance().checkForUpdates();
+        buildAutoUpdater(win);
     });
     var loginCount = 0;
     app.on('login', function (event, webContents, request, authInfo, callback) {
@@ -176,7 +184,7 @@ var generateMainWindow = function () {
         app.quit();
     }
     else {
-        app.on('second-instance', function (event, commandLine, workingDirectory) {
+        app.on('second-instance', function () {
             // Someone tried to run a second instance, we should focus our window.
             if (win) {
                 if (win.isMinimized()) {

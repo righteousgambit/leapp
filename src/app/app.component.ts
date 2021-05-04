@@ -105,6 +105,8 @@ export class AppComponent implements OnInit {
       this.beforeCloseInstructions();
     });
 
+    this.manageAutoUpdate();
+
 
     this.timerService.defineTimer();
 
@@ -139,5 +141,12 @@ export class AppComponent implements OnInit {
         this.configurationService.updateWorkspaceSync(workspace);
       }
     }
+  }
+
+  private manageAutoUpdate(): void {
+    const ipc = this.app.getIpcRenderer();
+    ipc.on('UPDATE_AVAILABLE', (_, info) => {
+      console.log(info);
+    });
   }
 }

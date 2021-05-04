@@ -4,7 +4,6 @@ import * as CryptoJS from 'crypto-js';
 import {initialConfiguration} from '../src/app/core/initial-configuration';
 import {machineIdSync} from 'node-machine-id';
 import {Workspace} from '../src/app/models/workspace';
-import {AppUpdater} from '../src/app/core/app-updater';
 
 const {app, BrowserWindow, globalShortcut, Menu, ipcMain } = require('electron');
 
@@ -12,6 +11,7 @@ const url = require('url');
 const fs = require('fs');
 const os = require('os');
 const log = require('electron-log');
+const { autoUpdater } = require('electron-updater');
 const ipc = ipcMain;
 
 // Fix for warning at startup
@@ -45,6 +45,18 @@ const windowDefaultConfig = {
 // Define the aws credentials path from config file in *src/environments*
 const workspacePath = os.homedir() + '/' + environment.lockFileDestination;
 const awsCredentialsPath = os.homedir() + '/' + environment.credentialsDestination;
+
+const buildAutoUpdater = (win: any): void => {
+  autoUpdater.allowDowngrade = false;
+  autoUpdater.allowPrerelease = false;
+  autoUpdater.autoDownload = false;
+
+  autoUpdater.checkForUpdates();
+
+  autoUpdater.on('update-available', (info) => {
+    win.webContents.send('UPDATE_AVAILABLE', info);
+  });
+};
 
 // Setup the first workspace in order to define the .Leapp directory and the .aws one
 const setupWorkspace = () => {
@@ -143,8 +155,7 @@ const generateMainWindow = () => {
 
   app.on('ready', () => {
     createWindow();
-    AppUpdater.getInstance().initUpdater({});
-    AppUpdater.getInstance().checkForUpdates();
+    buildAutoUpdater(win);
   });
 
   let loginCount = 0;
@@ -188,7 +199,7 @@ const generateMainWindow = () => {
   if (!gotTheLock) {
     app.quit();
   } else {
-    app.on('second-instance', (event, commandLine, workingDirectory) => {
+    app.on('second-instance', () => {
       // Someone tried to run a second instance, we should focus our window.
       if (win) {
         if (win.isMinimized()) { win.restore(); }
