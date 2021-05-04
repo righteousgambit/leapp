@@ -1,0 +1,22 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{ 'New version update' }}</h4>
+  <a class="close pull-right" aria-label="Close" (click)="close();">
+    <span aria-hidden="true">&times;</span>
+  </a>
+</div>
+
+<div class="modal-body text-center">
+
+  <h2>A new version is available</h2>
+  <h3>Version: {{version}}</h3>
+  <h3>Release Date: {{releaseDate}}</h3>
+  <br>
+  <p [innerHTML]="releaseNotes"></p>
+  <br>
+
+  <div class="button-equalizer">
+    <button (click)="remindMeLater();" class="disabled">Remind me later</button>
+    <button (click)="goToDownloadPage();">Download Update</button>
+  </div>
+
+</div>

@@ -8,6 +8,7 @@ import {FormControl, FormGroup} from '@angular/forms';
 import {environment} from '../../environments/environment';
 import {InputDialogComponent} from '../shared/input-dialog/input-dialog.component';
 import {constants} from '../core/enums/constants';
+import {UpdateDialogComponent} from '../shared/update-dialog/update-dialog.component';
 
 
 @Injectable({
@@ -143,16 +144,22 @@ export class AppService extends NativeService {
 
     switch (type) {
       case LoggerLevel.INFO:
-        if (!environment.production) { this.log.info(message); }
+        if (!environment.production) {
+          this.log.info(message);
+        }
         break;
       case LoggerLevel.WARN:
-        if (!environment.production) { this.log.warn(message); }
+        if (!environment.production) {
+          this.log.warn(message);
+        }
         break;
       case LoggerLevel.ERROR:
         this.log.error(message);
         break;
       default:
-        if (!environment.production) { this.log.info(message); }
+        if (!environment.production) {
+          this.log.info(message);
+        }
         break;
     }
   }
@@ -220,7 +227,8 @@ export class AppService extends NativeService {
       console.log('new win', this.newWin);
       try {
         this.newWin.close();
-      } catch (e) { }
+      } catch (e) {
+      }
       this.newWin = null;
     }
     this.newWin = new this.browserWindow(opts);
@@ -233,7 +241,7 @@ export class AppService extends NativeService {
    * @returns return a new browser window
    */
   newInvisibleWindow(url: string) {
-    const win = new this.browserWindow({ width: 1, height: 1, show: false });
+    const win = new this.browserWindow({width: 1, height: 1, show: false});
     win.loadURL(url);
     return win;
   }
@@ -259,10 +267,18 @@ export class AppService extends NativeService {
    */
   toast(message, type, title?: string) {
     switch (type) {
-      case ToastLevel.SUCCESS: this.toastr.success(message, title); break;
-      case ToastLevel.INFO: this.toastr.info(message, title); break;
-      case ToastLevel.WARN: this.toastr.warning(message, title); break;
-      case ToastLevel.ERROR: this.toastr.error(message, 'Invalid Action!'); break;
+      case ToastLevel.SUCCESS:
+        this.toastr.success(message, title);
+        break;
+      case ToastLevel.INFO:
+        this.toastr.info(message, title);
+        break;
+      case ToastLevel.WARN:
+        this.toastr.warning(message, title);
+        break;
+      case ToastLevel.ERROR:
+        this.toastr.error(message, 'Invalid Action!');
+        break;
     }
   }
 
@@ -271,7 +287,7 @@ export class AppService extends NativeService {
    * @returns the credential path string
    */
   awsCredentialPath() {
-   return this.path.join(this.os.homedir(), '.aws', 'credentials');
+    return this.path.join(this.os.homedir(), '.aws', 'credentials');
   }
 
   /**
@@ -321,7 +337,12 @@ export class AppService extends NativeService {
     for (let i = 1; i <= this.modalService.getModalsCount(); i++) {
       this.modalService.hide(i);
     }
-    this.modalService.show(ConfirmationDialogComponent, { backdrop: 'static', animated: false, class: 'confirm-modal', initialState: { message, callback}});
+    this.modalService.show(ConfirmationDialogComponent, {
+      backdrop: 'static',
+      animated: false,
+      class: 'confirm-modal',
+      initialState: {message, callback}
+    });
   }
 
   /**
@@ -332,11 +353,27 @@ export class AppService extends NativeService {
    * @param callback - the callback for the ok button to launch
    */
   inputDialog(title: string, placeholder: string, message: string, callback: any) {
-    console.log('inputDialog');
     for (let i = 1; i <= this.modalService.getModalsCount(); i++) {
       this.modalService.hide(i);
     }
-    this.modalService.show(InputDialogComponent, { backdrop: 'static', animated: false, class: 'confirm-modal', initialState: { title, placeholder, message, callback}});
+    this.modalService.show(InputDialogComponent, {
+      backdrop: 'static',
+      animated: false,
+      class: 'confirm-modal',
+      initialState: {title, placeholder, message, callback}
+    });
+  }
+
+  updateDialog(version: string, releaseDate: string, releaseNotes: string, callback: any): void {
+    for (let i = 1; i <= this.modalService.getModalsCount(); i++) {
+      this.modalService.hide(i);
+    }
+    this.modalService.show(UpdateDialogComponent, {
+      backdrop: 'static',
+      animated: false,
+      class: 'confirm-modal',
+      initialState: { version, releaseDate, releaseNotes, callback}
+    });
   }
 
   /**
@@ -355,7 +392,7 @@ export class AppService extends NativeService {
     Object.keys(formGroup.controls).forEach(field => {
       const control = formGroup.get(field);
       if (control instanceof FormControl) {
-        control.markAsTouched({ onlySelf: true });
+        control.markAsTouched({onlySelf: true});
       } else if (control instanceof FormGroup) {
         this.validateAllFormFields(control);
       }
@@ -379,8 +416,12 @@ export class AppService extends NativeService {
 
       if (values[4].length === 12 && Number(values[4])) {
         return values[4];
-      } else  { return ''; }
-    } else  { return ''; }
+      } else {
+        return '';
+      }
+    } else {
+      return '';
+    }
   }
 
   /**
@@ -494,11 +535,11 @@ export class AppService extends NativeService {
    */
   setFilteringForEc2Calls() {
     // Modify the user agent for all requests to the following urls.
-    const filter = { urls: ['https://*.amazonaws.com/'] };
+    const filter = {urls: ['https://*.amazonaws.com/']};
 
     this.session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
       details.requestHeaders['Origin'] = 'http://localhost:4200';
-      callback({ cancel: false, requestHeaders: details.requestHeaders });
+      callback({cancel: false, requestHeaders: details.requestHeaders});
     });
   }
 
@@ -519,7 +560,9 @@ export class AppService extends NativeService {
    * Check if the account is of type AZURE or not
    * @param s - the session containing the account
    */
-  isAzure(s) { return s.account.subscriptionId !== null && s.account.subscriptionId !== undefined; }
+  isAzure(s) {
+    return s.account.subscriptionId !== null && s.account.subscriptionId !== undefined;
+  }
 
 
   // TODO MOVE TO KEYCHAIN SERVICE
@@ -544,7 +587,7 @@ export class AppService extends NativeService {
   stsOptions(session) {
     let options: any = {
       maxRetries: 0,
-      httpOptions: { timeout: environment.timeout }
+      httpOptions: {timeout: environment.timeout}
     };
 
     if (session.account.region) {
@@ -560,11 +603,27 @@ export class AppService extends NativeService {
 
   createRoleSessionName(role) {
     let roleName = `${role}-trusted`;
-    roleName =  roleName.substr(0, 64).replace(/\//g, '-');
+    roleName = roleName.substr(0, 64).replace(/\//g, '-');
     return roleName;
   }
-}
 
+
+  /* ===================================================== */
+  /* UPDATER SECTION, FEEL FREE TO MOVE TO ANOTHER SERVICE */
+
+  /* ===================================================== */
+  createVersionJson(): void {
+
+  }
+
+  updateVersionJson(version: string): void {
+
+  }
+
+  compareLeappVersions(): boolean {
+    return false;
+  }
+}
 /*
 * External enum to the logger level so we can use this to define the type of log
 */
