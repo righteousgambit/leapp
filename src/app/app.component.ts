@@ -150,14 +150,9 @@ export class AppComponent implements OnInit {
     const ipc = this.app.getIpcRenderer();
     ipc.on('UPDATE_AVAILABLE', (_, info) => {
       console.log(info);
-      if (this.app.compareLeappVersions()) {
-        this.app.updateDialog(info.version, info.releaseDate, info.releaseNotes, (event) => {
-          if (event === constants.CONFIRM_CLOSED_AND_IGNORE_UPDATE) {
-
-          } else if (event === constants.CONFIRM_CLOSED_AND_DOWNLOAD_UPDATE) {
-            this.app.openExternalUrl(environment.latestUrl);
-          }
-        });
+      if (this.app.compareLeappVersionsAndReturnIfUpdateNeeded()) {
+        this.app.setUpdateInfo(info.version, info.releaseName, info.releaseDate, info.releaseNotes);
+        this.app.updateDialog();
       }
     });
   }

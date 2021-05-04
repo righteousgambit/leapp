@@ -85,18 +85,27 @@ export class TrayMenuComponent extends AntiMemLeak implements OnInit {
 
     const extraInfo = [
       { type: 'separator' },
-      { label: 'Show', type: 'normal', click: (menuItem, browserWindow, event) => { this.appService.getCurrentWindow().show(); } },
-      { label: 'About', type: 'normal', click: (menuItem, browserWindow, event) => { this.appService.getCurrentWindow().show(); this.appService.getDialog().showMessageBox({ icon: __dirname + `/assets/images/Leapp.png`, message: `Leapp.\n` + `Version ${version} (${version})\n` + 'Copyright 2019 beSharp srl.', buttons: ['Ok'] }); } },
+      { label: 'Show', type: 'normal', click: () => { this.appService.getCurrentWindow().show(); } },
+      { label: 'About', type: 'normal', click: () => { this.appService.getCurrentWindow().show(); this.appService.getDialog().showMessageBox({ icon: __dirname + `/assets/images/Leapp.png`, message: `Leapp.\n` + `Version ${version} (${version})\n` + 'Copyright 2019 beSharp srl.', buttons: ['Ok'] }); } },
       { type: 'separator' },
-      { label: 'Quit', type: 'normal', click: (menuItem, browserWindow, event) => { this.cleanBeforeExit(); } },
+      { label: 'Quit', type: 'normal', click: () => { this.cleanBeforeExit(); } },
     ];
-
-    voices = voices.concat(extraInfo);
-    const contextMenu = this.appService.getMenu().buildFromTemplate(voices);
 
     if (!this.currentTray) {
       this.currentTray = new (this.appService.getTray())(__dirname + `/assets/images/LeappMini.png`);
+    } else {
+      if (this.appService.compareLeappVersionsAndReturnIfUpdateNeeded()) {
+        voices.push({ type: 'separator' });
+        voices.push({ label: 'check for updates...', type: 'normal', click: () => { this.appService.updateDialog(); } });
+
+        this.currentTray.setImage(__dirname + `/assets/images/LeappMini2.png`);
+      } else {
+        this.currentTray.setImage(__dirname + `/assets/images/LeappMini.png`);
+      }
     }
+
+    voices = voices.concat(extraInfo);
+    const contextMenu = this.appService.getMenu().buildFromTemplate(voices);
 
     this.currentTray.setToolTip('Leapp');
     this.currentTray.setContextMenu(contextMenu);

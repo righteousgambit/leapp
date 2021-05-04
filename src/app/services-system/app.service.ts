@@ -17,10 +17,14 @@ import {UpdateDialogComponent} from '../shared/update-dialog/update-dialog.compo
 export class AppService extends NativeService {
 
   profileOpen: EventEmitter<boolean> = new EventEmitter<boolean>();
-  // TODO Why redrawList??
   redrawList: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   newWin;
+
+  version: string;
+  releaseName: string;
+  releaseDate: string;
+  releaseNotes: string;
 
   stsEndpointsPerRegion = new Map([
     ['af-south-1', 'https://sts.af-south-1.amazonaws.com'],
@@ -364,7 +368,17 @@ export class AppService extends NativeService {
     });
   }
 
-  updateDialog(version: string, releaseDate: string, releaseNotes: string, callback: any): void {
+  updateDialog(): void {
+
+    const callback = (event) => {
+      if (event === constants.CONFIRM_CLOSED_AND_IGNORE_UPDATE) {
+        this.app.updateVersionJson(this.version);
+        this.app.redrawList.emit();
+      } else if (event === constants.CONFIRM_CLOSED_AND_DOWNLOAD_UPDATE) {
+        this.app.openExternalUrl(`${environment.latestUrl}${this.releaseName}`);
+      }
+    };
+
     for (let i = 1; i <= this.modalService.getModalsCount(); i++) {
       this.modalService.hide(i);
     }
@@ -372,7 +386,7 @@ export class AppService extends NativeService {
       backdrop: 'static',
       animated: false,
       class: 'confirm-modal',
-      initialState: { version, releaseDate, releaseNotes, callback}
+      initialState: { version: this.version, releaseDate: this.releaseDate, releaseNotes: this.releaseNotes, callback}
     });
   }
 
@@ -620,10 +634,17 @@ export class AppService extends NativeService {
 
   }
 
-  compareLeappVersions(): boolean {
+  compareLeappVersionsAndReturnIfUpdateNeeded(): boolean {
     return false;
   }
-}
+
+  setUpdateInfo(version: string, releaseName: string, releaseDate: string, releaseNotes: string): void {
+    this.version = version;
+    this.releaseName = releaseName;
+    this.releaseDate = releaseDate;
+    this.releaseNotes = releaseNotes;
+  }
+ }
 /*
 * External enum to the logger level so we can use this to define the type of log
 */
