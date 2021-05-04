@@ -51,7 +51,12 @@ const buildAutoUpdater = (win: any): void => {
   autoUpdater.allowPrerelease = false;
   autoUpdater.autoDownload = false;
 
+  const minutes = 1;
+
   autoUpdater.checkForUpdates();
+  setInterval(() => {
+    autoUpdater.checkForUpdates();
+  }, 1000 * 60 * minutes);
 
   autoUpdater.on('update-available', (info) => {
     win.webContents.send('UPDATE_AVAILABLE', info);
