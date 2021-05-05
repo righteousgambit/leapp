@@ -224,7 +224,7 @@
     "@angular/language-service": "~8.1.0",
     "@biesbjerg/ngx-translate-extract": "~2.3.4",
     "@types/aws-sdk": "^2.7.0",
-    "@types/jasmine": "~3.5.11",
+    "@types/jasmine": "^3.5.14",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^10.17.51",
     "@types/uuid": "^8.3.0",

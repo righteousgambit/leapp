@@ -55,13 +55,12 @@ var buildAutoUpdater = function (win) {
     autoUpdater.allowDowngrade = false;
     autoUpdater.allowPrerelease = false;
     autoUpdater.autoDownload = false;
-    var minutes = 1;
+    var minutes = 10;
     autoUpdater.checkForUpdates();
     setInterval(function () {
         autoUpdater.checkForUpdates();
     }, 1000 * 60 * minutes);
     autoUpdater.on('update-available', function (info) {
-        log.info('here');
         win.webContents.send('UPDATE_AVAILABLE', info);
     });
 };

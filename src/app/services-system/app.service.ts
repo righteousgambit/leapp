@@ -631,11 +631,11 @@ export class AppService extends NativeService {
     this.getFs().writeFileSync(this.getOS().homedir() + '/.Leapp/latest.json', version);
   }
 
-  getCurrentAppVersion() {
+  getCurrentAppVersion(): string {
     return this.getApp().getVersion();
   }
 
-  getSavedAppVersion() {
+  getSavedAppVersion(): string {
     return this.getFs().readFileSync(this.getOS().homedir() + `/.Leapp/latest.json`).toString();
   }
 
@@ -659,7 +659,7 @@ export class AppService extends NativeService {
     return compareVersions(updateVersion, currentSavedVersion) > 0;
   }
 
-  getSavedVersionComparison() {
+  getSavedVersionComparison(): boolean {
     return compareVersions(this.getSavedAppVersion(), this.getCurrentAppVersion()) > 0;
   }
 
@@ -668,6 +668,7 @@ export class AppService extends NativeService {
     this.releaseName = releaseName;
     this.releaseDate = releaseDate;
     this.releaseNotes = releaseNotes;
+    this.redrawList.emit();
   }
 }
 /*

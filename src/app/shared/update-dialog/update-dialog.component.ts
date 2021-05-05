@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit, ViewEncapsulation} from '@angular/core';
 import {BsModalRef} from 'ngx-bootstrap';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {constants} from '../../core/enums/constants';
@@ -6,7 +6,8 @@ import {constants} from '../../core/enums/constants';
 @Component({
   selector: 'app-update-dialog',
   templateUrl: './update-dialog.component.html',
-  styleUrls: ['./update-dialog.component.scss']
+  styleUrls: ['./update-dialog.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class UpdateDialogComponent implements OnInit {
 
