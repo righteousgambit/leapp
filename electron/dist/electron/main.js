@@ -55,7 +55,7 @@ var buildAutoUpdater = function (win) {
     autoUpdater.allowDowngrade = false;
     autoUpdater.allowPrerelease = false;
     autoUpdater.autoDownload = false;
-    var minutes = 10;
+    var minutes = 1;
     autoUpdater.checkForUpdates();
     setInterval(function () {
         autoUpdater.checkForUpdates();

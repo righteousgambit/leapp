@@ -13,6 +13,7 @@ import {MenuService} from './services/menu.service';
 import {TimerService} from './services/timer-service';
 import {AccountType} from './models/AccountType';
 import * as uuid from 'uuid';
+import compareVersions from "compare-versions";
 
 @Component({
   selector: 'app-root',
@@ -144,12 +145,27 @@ export class AppComponent implements OnInit {
   }
 
   private manageAutoUpdate(): void {
-    this.app.checkVersionJson();
+    let savedVersion;
+    try {
+      savedVersion = this.app.getSavedAppVersion();
+    } catch (error) {
+      savedVersion = this.app.getCurrentAppVersion();
+    }
+
+    try {
+      if (compareVersions(savedVersion, this.app.getCurrentAppVersion()) <= 0) {
+        // We always need to maintain this order: fresh <= saved <= online
+        this.app.updateVersionJson(this.app.getCurrentAppVersion());
+      }
+    } catch (error) {
+      this.app.updateVersionJson(this.app.getCurrentAppVersion());
+    }
+
 
     const ipc = this.app.getIpcRenderer();
     ipc.on('UPDATE_AVAILABLE', (_, info) => {
       this.app.setUpdateInfo(info.version, info.releaseName, info.releaseDate, info.releaseNotes);
-      if (this.app.compareLeappVersionsAndReturnIfUpdateNeeded()) {
+      if (this.app.isUpdateNeeded()) {
         this.app.updateDialog();
       }
     });

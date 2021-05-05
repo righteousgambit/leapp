@@ -628,7 +628,7 @@ export class AppService extends NativeService {
 
   /* ===================================================== */
   updateVersionJson(version: string): void {
-    this.getFs().writeFileSync(this.getOS().homedir() + '/.Leapp/latest.json', version);
+    this.getFs().writeFileSync(this.getOS().homedir() + '/.Leapp/.latest.json', version);
   }
 
   getCurrentAppVersion(): string {
@@ -636,24 +636,10 @@ export class AppService extends NativeService {
   }
 
   getSavedAppVersion(): string {
-    return this.getFs().readFileSync(this.getOS().homedir() + `/.Leapp/latest.json`).toString();
+    return this.getFs().readFileSync(this.getOS().homedir() + `/.Leapp/.latest.json`).toString();
   }
 
-  checkVersionJson(): void {
-    let savedVersion;
-    try {
-      savedVersion = this.getSavedAppVersion();
-    } catch (error) {
-      savedVersion = this.getCurrentAppVersion();
-    }
-
-    if (compareVersions(savedVersion, this.getCurrentAppVersion()) <= 0) {
-      // We always need to maintain this order: fresh <= saved <= online
-      this.updateVersionJson(this.getCurrentAppVersion());
-    }
-  }
-
-  compareLeappVersionsAndReturnIfUpdateNeeded(): boolean {
+  isUpdateNeeded(): boolean {
     const currentSavedVersion = this.getSavedAppVersion();
     const updateVersion = this.version;
     return compareVersions(updateVersion, currentSavedVersion) > 0;

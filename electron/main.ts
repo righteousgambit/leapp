@@ -51,7 +51,7 @@ const buildAutoUpdater = (win: any): void => {
   autoUpdater.allowPrerelease = false;
   autoUpdater.autoDownload = false;
 
-  const minutes = 10;
+  const minutes = 1;
 
   autoUpdater.checkForUpdates();
   setInterval(() => {

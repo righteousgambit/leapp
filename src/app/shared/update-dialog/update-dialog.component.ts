@@ -20,22 +20,13 @@ export class UpdateDialogComponent implements OnInit {
   @Input()
   callback: any;
 
-  public form = new FormGroup({
-    value: new FormControl('', [Validators.required])
-  });
-
   /* Just a restyled modal to show a confirmation for delete actions */
   constructor(private bsModalRef: BsModalRef) { }
 
-  ngOnInit() {
-
-  }
+  ngOnInit() {}
 
   close() {
-    if (this.callback) {
-      this.callback(constants.CONFIRM_CLOSED_AND_IGNORE_UPDATE);
-    }
-    this.bsModalRef.hide();
+    this.remindMeLater();
   }
 
   remindMeLater() {
