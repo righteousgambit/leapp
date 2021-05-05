@@ -166,6 +166,7 @@ export class AppComponent implements OnInit {
     ipc.on('UPDATE_AVAILABLE', (_, info) => {
       this.app.setUpdateInfo(info.version, info.releaseName, info.releaseDate, info.releaseNotes);
       if (this.app.isUpdateNeeded()) {
+        this.app.redrawList.emit();
         this.app.updateDialog();
       }
     });

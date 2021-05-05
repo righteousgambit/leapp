@@ -374,7 +374,6 @@ export class AppService extends NativeService {
     const callback = (event) => {
       if (event === constants.CONFIRM_CLOSED_AND_IGNORE_UPDATE) {
         this.updateVersionJson(this.version);
-        this.redrawList.emit();
       } else if (event === constants.CONFIRM_CLOSED_AND_DOWNLOAD_UPDATE) {
         this.openExternalUrl(`${environment.latestUrl}${this.releaseName}`);
       }
