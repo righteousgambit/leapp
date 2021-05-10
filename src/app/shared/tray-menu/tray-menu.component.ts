@@ -10,6 +10,7 @@ import {AccountType} from '../../models/AccountType';
 import {AwsPlainAccount} from '../../models/aws-plain-account';
 import {AwsAccount} from '../../models/aws-account';
 import {AntiMemLeak} from '../../core/anti-mem-leak';
+import {UpdaterService} from '../../services/updater.service';
 
 @Component({
   selector: 'app-tray-menu',
@@ -21,12 +22,15 @@ export class TrayMenuComponent extends AntiMemLeak implements OnInit {
   // Used to define the only tray we want as active expecially in linux context
   currentTray;
 
-  constructor(private workspaceService: WorkspaceService,
-              private configurationService: ConfigurationService,
-              private credentialService: CredentialsService,
-              private fileService: FileService,
-              private sessionService: SessionService,
-              private appService: AppService) {
+  constructor(
+    private workspaceService: WorkspaceService,
+    private configurationService: ConfigurationService,
+    private credentialService: CredentialsService,
+    private fileService: FileService,
+    private sessionService: SessionService,
+    private appService: AppService,
+    private updaterService: UpdaterService
+  ) {
     super();
   }
 
@@ -95,13 +99,11 @@ export class TrayMenuComponent extends AntiMemLeak implements OnInit {
       this.currentTray = new (this.appService.getTray())(__dirname + `/assets/images/LeappMini.png`);
     }
 
-    if (this.appService.getSavedVersionComparison()) {
+    if (this.updaterService.getSavedVersionComparison()) {
       voices.push({ type: 'separator' });
-      voices.push({ label: 'check for updates...', type: 'normal', click: () => { this.appService.updateDialog(); } });
-
+      voices.push({ label: 'check for updates...', type: 'normal', click: () => { this.updaterService.updateDialog(); } });
       this.currentTray.setImage(__dirname + `/assets/images/LeappMini2.png`);
     }
-
 
     voices = voices.concat(extraInfo);
     const contextMenu = this.appService.getMenu().buildFromTemplate(voices);
@@ -132,5 +134,4 @@ export class TrayMenuComponent extends AntiMemLeak implements OnInit {
     // Finally quit
     this.appService.quit();
   }
-
 }

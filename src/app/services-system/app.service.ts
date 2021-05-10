@@ -8,9 +8,25 @@ import {FormControl, FormGroup} from '@angular/forms';
 import {environment} from '../../environments/environment';
 import {InputDialogComponent} from '../shared/input-dialog/input-dialog.component';
 import {constants} from '../core/enums/constants';
-import {UpdateDialogComponent} from '../shared/update-dialog/update-dialog.component';
-import compareVersions from 'compare-versions';
 
+/*
+* External enum to the logger level so we can use this to define the type of log
+*/
+export enum LoggerLevel {
+  INFO,
+  WARN,
+  ERROR
+}
+
+/*
+* External enum to the toast level so we can use this to define the type of log
+*/
+export enum ToastLevel {
+  INFO,
+  WARN,
+  ERROR,
+  SUCCESS
+}
 
 @Injectable({
   providedIn: 'root'
@@ -369,27 +385,6 @@ export class AppService extends NativeService {
     });
   }
 
-  updateDialog(): void {
-
-    const callback = (event) => {
-      if (event === constants.CONFIRM_CLOSED_AND_IGNORE_UPDATE) {
-        this.updateVersionJson(this.version);
-      } else if (event === constants.CONFIRM_CLOSED_AND_DOWNLOAD_UPDATE) {
-        this.openExternalUrl(`${environment.latestUrl}${this.releaseName}`);
-      }
-    };
-
-    for (let i = 1; i <= this.modalService.getModalsCount(); i++) {
-      this.modalService.hide(i);
-    }
-    this.modalService.show(UpdateDialogComponent, {
-      backdrop: 'static',
-      animated: false,
-      class: 'confirm-modal',
-      initialState: { version: this.version, releaseDate: this.releaseDate, releaseNotes: this.releaseNotes, callback}
-    });
-  }
-
   /**
    * With this one you can open an url in an external browser
    * @param url - url to open
@@ -620,56 +615,4 @@ export class AppService extends NativeService {
     roleName = roleName.substr(0, 64).replace(/\//g, '-');
     return roleName;
   }
-
-
-  /* ===================================================== */
-  /* UPDATER SECTION, FEEL FREE TO MOVE TO ANOTHER SERVICE */
-
-  /* ===================================================== */
-  updateVersionJson(version: string): void {
-    this.getFs().writeFileSync(this.getOS().homedir() + '/.Leapp/.latest.json', version);
-  }
-
-  getCurrentAppVersion(): string {
-    return this.getApp().getVersion();
-  }
-
-  getSavedAppVersion(): string {
-    return this.getFs().readFileSync(this.getOS().homedir() + `/.Leapp/.latest.json`).toString();
-  }
-
-  isUpdateNeeded(): boolean {
-    const currentSavedVersion = this.getSavedAppVersion();
-    const updateVersion = this.version;
-    return compareVersions(updateVersion, currentSavedVersion) > 0;
-  }
-
-  getSavedVersionComparison(): boolean {
-    return compareVersions(this.getSavedAppVersion(), this.getCurrentAppVersion()) > 0;
-  }
-
-  setUpdateInfo(version: string, releaseName: string, releaseDate: string, releaseNotes: string): void {
-    this.version = version;
-    this.releaseName = releaseName;
-    this.releaseDate = releaseDate;
-    this.releaseNotes = releaseNotes;
-    this.redrawList.emit();
-  }
-}
-/*
-* External enum to the logger level so we can use this to define the type of log
-*/
-export enum LoggerLevel {
-  INFO,
-  WARN,
-  ERROR
-}
-/*
-* External enum to the toast level so we can use this to define the type of log
-*/
-export enum ToastLevel {
-  INFO,
-  WARN,
-  ERROR,
-  SUCCESS
 }
