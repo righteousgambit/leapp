@@ -101,7 +101,7 @@ export class TrayMenuComponent extends AntiMemLeak implements OnInit {
 
     if (this.updaterService.getSavedVersionComparison()) {
       voices.push({ type: 'separator' });
-      voices.push({ label: 'check for updates...', type: 'normal', click: () => { this.updaterService.updateDialog(); } });
+      voices.push({ label: 'Check for Updates...', type: 'normal', click: () => { this.updaterService.updateDialog(); } });
       this.currentTray.setImage(__dirname + `/assets/images/LeappMini2.png`);
     }
 

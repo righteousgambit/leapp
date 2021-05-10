@@ -5,7 +5,7 @@ import {AppService} from '../services-system/app.service';
 import {constants} from '../core/enums/constants';
 import {environment} from '../../environments/environment';
 import {UpdateDialogComponent} from '../shared/update-dialog/update-dialog.component';
-import {BsModalService} from 'ngx-bootstrap';
+import {BsModalRef, BsModalService} from 'ngx-bootstrap';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,7 @@ export class UpdaterService extends NativeService {
   releaseName: string;
   releaseDate: string;
   releaseNotes: string;
+  bsModalRef: BsModalRef;
 
   constructor(
     private appService: AppService,
@@ -47,6 +48,7 @@ export class UpdaterService extends NativeService {
     this.releaseName = releaseName;
     this.releaseDate = releaseDate;
     this.releaseNotes = releaseNotes;
+
     this.appService.redrawList.emit();
   }
 
@@ -54,20 +56,25 @@ export class UpdaterService extends NativeService {
     const callback = (event) => {
       if (event === constants.CONFIRM_CLOSED_AND_IGNORE_UPDATE) {
         this.updateVersionJson(this.version);
+        this.appService.redrawList.emit();
       } else if (event === constants.CONFIRM_CLOSED_AND_DOWNLOAD_UPDATE) {
         this.appService.openExternalUrl(`${environment.latestUrl}${this.releaseName}`);
       }
+      this.bsModalRef = undefined;
     };
 
-    for (let i = 1; i <= this.bsModalService.getModalsCount(); i++) {
-      this.bsModalService.hide(i);
+    if (!this.bsModalRef) {
+      for (let i = 1; i <= this.bsModalService.getModalsCount(); i++) {
+        this.bsModalService.hide(i);
+      }
+
+      this.bsModalRef = this.bsModalService.show(UpdateDialogComponent, {
+        backdrop: 'static',
+        animated: false,
+        class: 'confirm-modal',
+        initialState: { version: this.version, releaseDate: this.releaseDate, releaseNotes: this.releaseNotes, callback}
+      });
     }
-    this.bsModalService.show(UpdateDialogComponent, {
-      backdrop: 'static',
-      animated: false,
-      class: 'confirm-modal',
-      initialState: { version: this.version, releaseDate: this.releaseDate, releaseNotes: this.releaseNotes, callback}
-    });
   }
 
   updateVersionJson(version: string): void {
