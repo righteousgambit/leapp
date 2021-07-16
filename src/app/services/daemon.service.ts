@@ -4,7 +4,7 @@ import {AppService, LoggerLevel} from './app.service';
 import {FileService} from './file.service';
 import {ExecuteService} from './execute.service';
 import {environment} from '../../environments/environment';
-import {LeappBaseError} from "../errors/leapp-base-error";
+import {LeappBaseError} from '../errors/leapp-base-error';
 
 @Injectable({
   providedIn: 'root'
@@ -21,19 +21,23 @@ export class DaemonService {
   async launchDaemon() {
 
     // Calling leapp-daemon
-    let daemonPath = path.join(this.appService.getProcess().resourcesPath, 'extraResources').substring(1);
+    const daemonPath = path.join(this.appService.getProcess().resourcesPath, 'extraResources').substring(1);
 
-    if (!environment.production) {
+    /*if (!environment.production) {
       daemonPath = `./src/assets/extraResources`;
-    }
+    }*/
 
-    const daemonFile = daemonPath + '/leapp_daemon';
+    const daemonFile = daemonPath + '/awesomeService';
 
     try {
+      console.log('awesome');
       if (this.fileService.exists(daemonFile)) {
-        const result = await this.executeService.executeAbsolute(`${daemonPath}/./leapp_daemonZ`);
+        console.log('exists');
+        console.log(`${daemonPath}/awesomeService '${daemonFile}'`);
+        const result = await this.executeService.executeAbsolute(`${daemonPath}/awesomeService '${daemonFile}'`);
       }
     } catch(err) {
+      console.log(err);
       throw new LeappBaseError('Daemon Error', this, LoggerLevel.warn, err);
     }
   }

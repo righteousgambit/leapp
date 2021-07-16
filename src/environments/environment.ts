@@ -17,7 +17,7 @@ const environment = {
   defaultLocation: 'eastus',
   defaultAwsProfileName: 'default',
   defaultAzureProfileName: 'default-azure',
-  latestUrl: 'https://leapp.cloud/releases.html'
+  latestUrl: 'https://www.leapp.cloud/releases'
 };
 
 export { environment };
