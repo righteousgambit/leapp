@@ -11,6 +11,7 @@ import {AwsSsoRoleService} from './session/aws/methods/aws-sso-role.service';
 import {AzureService} from './session/azure/azure.service';
 import {ExecuteService} from './execute.service';
 import {SessionService} from './session.service';
+import {DaemonService} from './daemon.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +25,7 @@ export class SessionFactoryService {
     private keychainService: KeychainService,
     private appService: AppService,
     private executeService: ExecuteService,
+    private daemonService: DaemonService,
     private fileService: FileService) {
 
     this.sessionServiceCache = [];
@@ -54,13 +56,13 @@ export class SessionFactoryService {
   }
 
   private getAwsIamUserSessionService(accountType: SessionType): AwsIamUserService {
-    const service = new AwsIamUserService(this.workspaceService, this.keychainService, this.appService, this.fileService);
+    const service = new AwsIamUserService(this.workspaceService, this.keychainService, this.appService, this.fileService, this.daemonService);
     this.sessionServiceCache[accountType.toString()] = service;
     return service;
   }
 
   private getAwsIamRoleChainedSessionService(accountType: SessionType) {
-    const service = new AwsIamRoleChainedService(this.workspaceService, this.appService, this.fileService, this.keychainService);
+    const service = new AwsIamRoleChainedService(this.workspaceService, this.appService, this.fileService, this.keychainService, this.daemonService);
     this.sessionServiceCache[accountType.toString()] = service;
     return service;
   }

@@ -13,7 +13,8 @@ import {UpdaterService} from './services/updater.service';
 import compareVersions from 'compare-versions';
 import {RetrocompatibilityService} from './services/retrocompatibility.service';
 import {LeappParseError} from './errors/leapp-parse-error';
-import {DaemonService} from './services/daemon.service';
+import {DaemonService, DaemonUrls} from './services/daemon.service';
+import {LeappBaseError} from "./errors/leapp-base-error";
 
 @Component({
   selector: 'app-root',
@@ -86,6 +87,9 @@ export class AppComponent implements OnInit {
     // Launch Auto Updater Routines
     this.manageAutoUpdate();
 
+    // Launch Daemon
+    this.daemonService.launchDaemon();
+
     // Go to initial page if no sessions are already created or
     // go to the list page if is your second visit
     if (workspace.sessions.length > 0) {
@@ -94,7 +98,6 @@ export class AppComponent implements OnInit {
       this.router.navigate(['/start', 'start-page']);
     }
 
-    this.daemonService.launchDaemon();
   }
 
   /**

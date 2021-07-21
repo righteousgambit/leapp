@@ -14,6 +14,8 @@ import {AwsIamRoleFederatedService} from './aws-iam-role-federated.service';
 import {KeychainService} from '../../../keychain.service';
 import {AwsIamUserService} from './aws-iam-user.service';
 import {AwsSsoRoleService} from './aws-sso-role.service';
+import {DaemonService} from '../../../daemon.service';
+import {SessionService} from '../../../session.service';
 
 export interface AwsIamRoleChainedSessionRequest {
   accountName: string;
@@ -31,7 +33,8 @@ export class AwsIamRoleChainedService extends AwsSessionService {
     protected workspaceService: WorkspaceService,
     private appService: AppService,
     private fileService: FileService,
-    private keychainService: KeychainService
+    private keychainService: KeychainService,
+    private daemonService: DaemonService
   ) {
     super(workspaceService);
   }
@@ -95,7 +98,7 @@ export class AwsIamRoleChainedService extends AwsSessionService {
     if(parentSession.type === SessionType.awsIamRoleFederated) {
       parentSessionService = new AwsIamRoleFederatedService(this.workspaceService, this.keychainService, this.appService, this.fileService) as AwsSessionService;
     } else if(parentSession.type === SessionType.awsIamUser) {
-      parentSessionService = new AwsIamUserService(this.workspaceService, this.keychainService, this.appService, this.fileService) as AwsSessionService;
+      parentSessionService = new AwsIamUserService(this.workspaceService, this.keychainService, this.appService, this.fileService, this.daemonService) as SessionService;
     } else if(parentSession.type === SessionType.awsSsoRole) {
       parentSessionService = new AwsSsoRoleService(this.workspaceService, this.fileService, this.appService, this.keychainService) as AwsSessionService;
     }

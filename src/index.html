@@ -36,7 +36,7 @@
     process,
     mousetrap: require('mousetrap'),
     shell: require('electron').shell,
-    MachineId: require('node-machine-id').machineIdSync(),
+    MachineId: require('node-machine-id').machineIdSync(true),
     keytar: require('keytar'),
     followRedirects: require('follow-redirects'),
     httpProxyAgent: require('http-proxy-agent'),
@@ -50,7 +50,8 @@
     Tray: require('electron').remote.Tray,
     ipcRenderer: require('electron').ipcRenderer,
     nativeTheme: require('electron').remote.nativeTheme,
-    notification: require('electron').remote.Notification
+    notification: require('electron').remote.Notification,
+    crypto: require('crypto')
   };
 </script>
 <app-root></app-root>

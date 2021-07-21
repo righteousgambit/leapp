@@ -16,7 +16,7 @@ const environment = {
   defaultLocation: 'eastus',
   defaultAwsProfileName: 'default',
   defaultAzureProfileName: 'default-azure',
-  latestUrl: 'https://www.leapp.cloud/releases'
+  latestUrl: 'https://leapp.cloud/releases.html'
 };
 
 environment.lockFileDestination = `.Leapp/Leapp-lock.json`;

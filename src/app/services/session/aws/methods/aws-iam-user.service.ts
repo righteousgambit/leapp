@@ -1,12 +1,11 @@
 import {Injectable} from '@angular/core';
 import {CredentialsInfo} from '../../../../models/credentials-info';
-import {AwsSessionService} from '../aws-session.service';
 import {WorkspaceService} from '../../../workspace.service';
 import {AwsIamUserSession} from '../../../../models/aws-iam-user-session';
 import {KeychainService} from '../../../keychain.service';
 import {environment} from '../../../../../environments/environment';
 import {Session} from '../../../../models/session';
-import {AppService} from '../../../app.service';
+import {AppService, LoggerLevel} from '../../../app.service';
 import AWS from 'aws-sdk';
 import {GetSessionTokenResponse} from 'aws-sdk/clients/sts';
 import {FileService} from '../../../file.service';
@@ -14,6 +13,13 @@ import {Constants} from '../../../../models/constants';
 import {LeappAwsStsError} from '../../../../errors/leapp-aws-sts-error';
 import {LeappParseError} from '../../../../errors/leapp-parse-error';
 import {LeappMissingMfaTokenError} from '../../../../errors/leapp-missing-mfa-token-error';
+import {DaemonService, DaemonUrls} from '../../../daemon.service';
+import {LeappBaseError} from '../../../../errors/leapp-base-error';
+import {SessionService} from '../../../session.service';
+import {SessionType} from '../../../../models/session-type';
+import {AwsIamRoleChainedSession} from '../../../../models/aws-iam-role-chained-session';
+import {SessionStatus} from '../../../../models/session-status';
+import {AwsSessionService} from '../aws-session.service';
 
 export interface AwsIamUserSessionRequest {
   accountName: string;
@@ -27,152 +33,124 @@ export interface AwsIamUserSessionRequest {
   providedIn: 'root'
 })
 export class AwsIamUserService extends AwsSessionService {
-
   constructor(
     protected workspaceService: WorkspaceService,
     private keychainService: KeychainService,
     private appService: AppService,
-    private fileService: FileService) {
+    private fileService: FileService,
+    private daemonService: DaemonService) {
     super(workspaceService);
   }
 
-  static isTokenExpired(tokenExpiration: string): boolean {
-    const now = Date.now();
-    return now > new Date(tokenExpiration).getTime();
-  }
-
-  static sessionTokenFromGetSessionTokenResponse(getSessionTokenResponse: GetSessionTokenResponse): { sessionToken: any } {
-    return {
-      sessionToken: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        aws_access_key_id: getSessionTokenResponse.Credentials.AccessKeyId.trim(),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        aws_secret_access_key: getSessionTokenResponse.Credentials.SecretAccessKey.trim(),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        aws_session_token: getSessionTokenResponse.Credentials.SessionToken.trim(),
-      }
-    };
-  }
-
-  create(accountRequest: AwsIamUserSessionRequest, profileId: string): void {
-    const session = new AwsIamUserSession(accountRequest.accountName, accountRequest.region, profileId, accountRequest.mfaDevice);
-    this.keychainService.saveSecret(environment.appName, `${session.sessionId}-iam-user-aws-session-access-key-id`, accountRequest.accessKey);
-    this.keychainService.saveSecret(environment.appName, `${session.sessionId}-iam-user-aws-session-secret-access-key`, accountRequest.secretKey);
-    this.workspaceService.addSession(session);
-  }
-
-  async applyCredentials(sessionId: string, credentialsInfo: CredentialsInfo): Promise<void> {
-    const session = this.get(sessionId);
-    const profileName = this.workspaceService.getProfileName((session as AwsIamUserSession).profileId);
-    const credentialObject = {};
-    credentialObject[profileName] = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      aws_access_key_id: credentialsInfo.sessionToken.aws_access_key_id,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      aws_secret_access_key: credentialsInfo.sessionToken.aws_secret_access_key,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      aws_session_token: credentialsInfo.sessionToken.aws_session_token,
-      region: session.region
-    };
-    return await this.fileService.iniWriteSync(this.appService.awsCredentialPath(), credentialObject);
-  }
-
-  async deApplyCredentials(sessionId: string): Promise<void> {
-    const session = this.get(sessionId);
-    const profileName = this.workspaceService.getProfileName((session as AwsIamUserSession).profileId);
-    const credentialsFile = await this.fileService.iniParseSync(this.appService.awsCredentialPath());
-    delete credentialsFile[profileName];
-    return await this.fileService.replaceWriteSync(this.appService.awsCredentialPath(), credentialsFile);
-  }
-
-  async generateCredentials(sessionId: string): Promise<CredentialsInfo> {
-      // Get the session in question
-      const session = this.get(sessionId);
-      // Retrieve session token expiration
-      const tokenExpiration = (session as AwsIamUserSession).sessionTokenExpiration;
-      // Check if token is expired
-      if (!tokenExpiration || AwsIamUserService.isTokenExpired(tokenExpiration)) {
-        // Token is Expired!
-        // Retrieve access keys from keychain
-        const accessKeyId = await this.getAccessKeyFromKeychain(sessionId);
-        const secretAccessKey = await this.getSecretKeyFromKeychain(sessionId);
-        // Get session token
-        // https://docs.aws.amazon.com/STS/latest/APIReference/API_GetSessionToken.html
-        AWS.config.update({ accessKeyId, secretAccessKey });
-        // Configure sts client options
-        const sts = new AWS.STS(this.appService.stsOptions(session));
-        // Configure sts get-session-token api call params
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const params = { DurationSeconds: environment.sessionTokenDuration };
-        // Check if MFA is needed or not
-        if ((session as AwsIamUserSession).mfaDevice) {
-          // Return session token after calling MFA modal
-          return this.generateSessionTokenCallingMfaModal(session, sts, params);
-        } else {
-          // Return session token in the form of CredentialsInfo
-          return this.generateSessionToken(session, sts, params);
-        }
-      } else {
-        // Session Token is NOT expired
-        try {
-          // Retrieve session token from keychain
-          return JSON.parse(await this.keychainService.getSecret(environment.appName, `${session.sessionId}-iam-user-aws-session-token`));
-        } catch (err) {
-          throw new LeappParseError(this, err.message);
-        }
-      }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  private generateSessionTokenCallingMfaModal( session: Session, sts: AWS.STS, params: { DurationSeconds: number }): Promise<CredentialsInfo> {
-    return new Promise((resolve, reject) => {
-      this.appService.inputDialog('MFA Code insert', 'Insert MFA Code', 'please insert MFA code from your app or device', (value) => {
-        if (value !== Constants.confirmClosed) {
-          params['SerialNumber'] = (session as AwsIamUserSession).mfaDevice;
-          params['TokenCode'] = value;
-          // Return session token in the form of CredentialsInfo
-          resolve(this.generateSessionToken(session, sts, params));
-        } else {
-          reject(new LeappMissingMfaTokenError(this, 'Missing Multi Factor Authentication code'));
-        }
-      });
-    });
-  }
-
-  private async getAccessKeyFromKeychain(sessionId: string): Promise<string> {
-    return await this.keychainService.getSecret(environment.appName, `${sessionId}-iam-user-aws-session-access-key-id`);
-  }
-
-  private async getSecretKeyFromKeychain(sessionId: string): Promise<string> {
-    return await this.keychainService.getSecret(environment.appName, `${sessionId}-iam-user-aws-session-secret-access-key`);
-  }
-
-  private async generateSessionToken(session: Session, sts: AWS.STS, params: any): Promise<CredentialsInfo> {
+  async start(sessionId: string): Promise<void> {
     try {
-      // Invoke sts get-session-token api
-      const getSessionTokenResponse: GetSessionTokenResponse = await sts.getSessionToken(params).promise();
+      this.sessionLoading(sessionId);
 
-      // Save session token expiration
-      this.saveSessionTokenResponseInTheSession(session, getSessionTokenResponse);
+      await this.daemonService.callDaemon(DaemonUrls.startIamUserSession, { id: sessionId }, 'POST');
 
-      // Generate correct object from session token response
-      const sessionToken = AwsIamUserService.sessionTokenFromGetSessionTokenResponse(getSessionTokenResponse);
-
-      // Save in keychain the session token
-      await this.keychainService.saveSecret(environment.appName, `${session.sessionId}-iam-user-aws-session-token`, JSON.stringify(sessionToken));
-
-      // Return Session Token
-      return sessionToken;
-    } catch (err) {
-      throw new LeappAwsStsError(this, err.message);
+      this.sessionActivate(sessionId);
+    } catch (error) {
+      this.sessionError(sessionId, error);
     }
   }
 
-  private saveSessionTokenResponseInTheSession(session: Session, getSessionTokenResponse: AWS.STS.GetSessionTokenResponse): void {
-    const index = this.workspaceService.sessions.indexOf(session);
-    const currentSession: Session = this.workspaceService.sessions[index];
-    (currentSession as AwsIamUserSession).sessionTokenExpiration = getSessionTokenResponse.Credentials.Expiration.toISOString();
-    this.workspaceService.sessions[index] = currentSession;
-    this.workspaceService.sessions = [...this.workspaceService.sessions];
+  async rotate(sessionId: string): Promise<void> {
+    return;
+  }
+
+  async stop(sessionId: string): Promise<void> {
+    try {
+      await this.daemonService.callDaemon(DaemonUrls.stopIamUserSession, { id: sessionId }, 'POST');
+
+      this.sessionDeactivated(sessionId);
+      return;
+    } catch (error) {
+      this.sessionError(sessionId, error);
+    }
+  }
+
+  async create(accountRequest: AwsIamUserSessionRequest, profileId: string): Promise<void> {
+    const iamUserCreateDto = {
+      name: accountRequest.accountName,
+      region: accountRequest.region,
+      mfaDevice: accountRequest.mfaDevice,
+      awsNamedProfileName: profileId,
+      awsAccessKeyId: accountRequest.accessKey,
+      awsSecretAccessKey: accountRequest.secretKey
+    };
+
+    try {
+      const response = await this.daemonService.callDaemon(DaemonUrls.createIamUser, iamUserCreateDto, 'POST');
+      // Temporary save also on local workspace
+      const session = new AwsIamUserSession(accountRequest.accountName, accountRequest.region, profileId, accountRequest.mfaDevice);
+      session.sessionId = response.data;
+
+      console.log(session);
+
+      this.workspaceService.addSession(session);
+    } catch (err) {
+      throw new LeappBaseError('Daemon Error', this, LoggerLevel.warn, err.message);
+    }
+  }
+
+  async update(sessionId: string, session: Session, accessKey?: string, secretKey?: string) {
+    const sessions = this.list();
+    const index = sessions.findIndex(sess => sess.sessionId === sessionId);
+
+    if(index > -1) {
+      try {
+        const iamUserEditDto = {
+          id: sessionId,
+          name: (session as AwsIamUserSession).sessionName,
+          region: (session as AwsIamUserSession).region,
+          mfaDevice: (session as AwsIamUserSession).mfaDevice,
+          awsNamedProfileName: (session as AwsIamUserSession).profileId,
+          awsAccessKeyId: accessKey,
+          awsSecretAccessKey: secretKey
+        };
+
+        await this.daemonService.callDaemon(DaemonUrls.editIamUser, iamUserEditDto, 'PUT');
+
+        this.workspaceService.sessions[index] = session;
+        this.workspaceService.sessions = [...this.workspaceService.sessions];
+        return;
+      } catch (error) {
+        this.sessionError(sessionId, error);
+      }
+    }
+  }
+
+  async delete(sessionId: string): Promise<void> {
+    try {
+      if (this.get(sessionId).status === SessionStatus.active) {
+        await this.stop(sessionId);
+      }
+      this.listIamRoleChained(this.get(sessionId)).forEach(sess => {
+        if (sess.status === SessionStatus.active) {
+          this.stop(sess.sessionId);
+        }
+
+        this.daemonService.callDaemon(DaemonUrls.deleteIamUser, { id: sess.sessionId }, 'DELETE');
+        this.workspaceService.removeSession(sess.sessionId);
+      });
+
+      this.daemonService.callDaemon(DaemonUrls.deleteIamUser, { id: sessionId }, 'DELETE');
+      this.workspaceService.removeSession(sessionId);
+
+    } catch(error) {
+      this.sessionError(sessionId, error);
+    }
+  }
+
+  applyCredentials(sessionId: string, credentialsInfo: CredentialsInfo): Promise<void> {
+    return Promise.resolve(undefined);
+  }
+
+  deApplyCredentials(sessionId: string): Promise<void> {
+    return Promise.resolve(undefined);
+  }
+
+  generateCredentials(sessionId: string): Promise<CredentialsInfo> {
+    return Promise.resolve(undefined);
   }
 }

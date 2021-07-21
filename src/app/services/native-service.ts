@@ -38,6 +38,7 @@ export class NativeService {
   protected httpsProxyAgent: any;
   protected nativeTheme: any;
   protected notification: any;
+  protected crypto: any;
 
   constructor() {
     if ((window as any).native) {
@@ -72,8 +73,7 @@ export class NativeService {
       this.ipcRenderer = (window as any).native.ipcRenderer;
       this.nativeTheme = (window as any).native.nativeTheme;
       this.notification = (window as any).native.notification;
-
-      console.log(this.nativeTheme);
+      this.crypto = (window as any).native.crypto;
     }
   }
 }
