@@ -12,7 +12,7 @@ import {AwsIamRoleFederatedSession} from '../../../models/aws-iam-role-federated
 import {UpdaterService} from '../../../services/updater.service';
 import {SessionService} from '../../../services/session.service';
 import {SessionFactoryService} from '../../../services/session-factory.service';
-import {normalizeSourceMaps} from "@angular-devkit/build-angular/src/utils";
+import {normalizeSourceMaps} from '@angular-devkit/build-angular/src/utils';
 
 @Component({
   selector: 'app-tray-menu',

@@ -16,7 +16,7 @@ chrome-profiler-events.json
 speed-measure-plugin.json
 
 # IDEs and editors
-/.idea
+.idea/
 .project
 .classpath
 .c9/
@@ -33,14 +33,14 @@ speed-measure-plugin.json
 .history/*
 
 # misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
+.sass-cache
+connect.lock
+coverage/
+libpeerconnection.log
 npm-debug.log
 yarn-error.log
 testem.log
-/typings
+typings/
 
 # System Files
 .DS_Store
@@ -51,13 +51,12 @@ windows.pfx
 
 package-lock.json
 
-/electron/dist
-/release
-/dist
-/temp
+electron/dist/
+release/
+dist/
+temp/
 
 start.sh
-
 
 #Mkdocs
 site/

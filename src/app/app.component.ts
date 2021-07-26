@@ -105,7 +105,6 @@ export class AppComponent implements OnInit {
     } else {
       this.router.navigate(['/start', 'start-page']);
     }
-
   }
 
   /**
@@ -183,8 +182,6 @@ export class AppComponent implements OnInit {
         this.workspaceService.sessions = [...this.workspaceService.sessions];
       }
     });
-
-
   }
 
   private launchDaemonWebSocket() {

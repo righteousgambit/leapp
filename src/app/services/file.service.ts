@@ -250,7 +250,6 @@ export class FileService extends NativeService {
    * Decrypt Text
    */
   decryptText(text: string): string {
-
     const contents = Buffer.from(Buffer.from(text, 'base64').toString('hex'), 'hex');
     const key = this.machineId.replaceAll('-', '').toUpperCase();
     const iv = contents.slice(0, 16);

@@ -6,42 +6,42 @@ nav:
   - Overview: index.md
   - Concepts: concepts.md
   - 'Use Cases':
-      - 'AWS IAM User': 'use-cases/aws_iam_user.md'
-      - 'AWS IAM Role': 'use-cases/aws_iam_role.md'
-      - 'AWS SSO': 'use-cases/aws_sso.md'
+      - 'Introduction': 'use-cases/intro.md'
+      - 'AWS':
+        - 'AWS IAM User': 'use-cases/aws_iam_user.md'
+        - 'AWS IAM Role': 'use-cases/aws_iam_role.md'
+        - 'AWS SSO': 'use-cases/aws_sso.md'
       - 'Azure': 'use-cases/azure.md'
   - 'Tutorials':
       - 'First Access': 'tutorials/first_access.md'
       - 'AWS':
-        - 'IAM User': 'tutorials/aws/iam_user_setup.md'
-        - 'IAM Federated Role':
-          - 'G Suite Federation': 'tutorials/aws/federated/gsuite_federation_setup.md'
-          - 'AWS Federation': 'tutorials/aws/federated/aws_federation_setup.md'
-          - 'Enable Federated Access': 'tutorials/aws/federated/enable_federated_access.md'
-          - 'Assign Role to GSuite Principal': 'tutorials/aws/federated/assign_role.md'
-          - 'Setup Leapp Federated': 'tutorials/aws/federated/leapp_federated_setup.md'
-        - 'IAM Chained Role':
-          - 'Setup Trust Relationship': 'tutorials/aws/chained/trust_setup.md'
-          - 'Setup Leapp Chained': 'tutorials/aws/chained/leapp_chained_setup.md'
-        - 'AWS SSO': 'tutorials/aws/aws_sso.md'
+        - 'AWS IAM User': 'tutorials/aws/iam_user/setup_in_leapp.md'
+        - 'AWS IAM Federated Role':
+          - 'Introduction': 'tutorials/aws/iam_federated_role/intro.md'
+          - 'Step 1: G Suite Federation': 'tutorials/aws/iam_federated_role/gsuite_federation_setup.md'
+          - 'Step 2: AWS Federation': 'tutorials/aws/iam_federated_role/aws_federation_setup.md'
+          - 'Step 3: Enable Federated Access': 'tutorials/aws/iam_federated_role/enable_federated_access.md'
+          - 'Step 4: Assign Role to GSuite Principal': 'tutorials/aws/iam_federated_role/assign_role.md'
+          - 'Step 5: Setup in Leapp': 'tutorials/aws/iam_federated_role/setup_in_leapp.md'
+        - 'AWS IAM Chained Role':
+          - 'Introduction': 'tutorials/aws/iam_chained_role/intro.md'
+          - 'Step 1: Setup Trust Relationship': 'tutorials/aws/iam_chained_role/trust_relationship_setup.md'
+          - 'Step 2: Setup in Leapp': 'tutorials/aws/iam_chained_role/setup_in_leapp.md'
+        - 'AWS SSO': 'tutorials/aws/aws_sso/setup_in_leapp.md'
+        - 'AWS SSM Connect': 'tutorials/aws/aws_ssm_connect.md'
       - 'Azure':
-        - 'G Suite Federation': 'tutorials/azure/gsuite_federation_setup.md'
-        - 'Setup Leapp Federated': 'tutorials/azure/leapp_federated_setup.md'
-      - 'Misc':
-          - 'Quick List': 'tutorials/misc/quick_list.md'
-          - 'Default Region/Location': 'tutorials/misc/defaults.md'
-          - 'Session Region/Location': 'tutorials/misc/session_region.md'
-          - 'Named Profiles': 'tutorials/misc/named_profiles.md'
+        - 'Step 1: G Suite Federation': 'tutorials/azure/gsuite_federation_setup.md'
+        - 'Step 2: Setup in Leapp': 'tutorials/azure/setup_in_leapp.md'
   - 'Contributing':
-      - 'Project Structure':
-          - 'Overview': 'contributing/structure/overview.md'
-          - 'Updater': 'contributing/structure/updater.md'
-          - 'System Vault': 'contributing/structure/system_vault.md'
-          - 'AWS Named Profiles': 'contributing/structure/aws_named_profiles.md'
-          - 'AWS SSO': 'contributing/structure/aws_sso.md'
+      - 'Project Structure': 'contributing/project_structure.md'
+      - 'Updater': 'contributing/updater.md'
+      - 'System Vault': 'contributing/system_vault.md'
+      - 'AWS Named Profiles': 'contributing/aws_named_profiles.md'
+      - 'AWS SSO': 'contributing/aws-sso.md'
+      - 'Default Options': 'contributing/default_options.md'
+      - 'Integrations': 'contributing/integrations.md'
   - 'Community':
       - 'Get Involved': 'community/get_involved.md'
-      - 'Guides and Resources': 'community/guides.md'
 
 theme:
   logo: images/icon.png
@@ -69,6 +69,7 @@ theme:
 plugins:
   - search
   - mkdocs-video
+  - img2fig
 
 extra_css:
   - stylesheets/extra.css
